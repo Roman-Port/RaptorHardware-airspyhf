@@ -41,57 +41,7 @@ use_c99()
 set(c_sources ${CMAKE_CURRENT_SOURCE_DIR}/airspyhf.c ${CMAKE_CURRENT_SOURCE_DIR}/iqbalancer.c CACHE INTERNAL "List of C sources")
 set(c_headers ${CMAKE_CURRENT_SOURCE_DIR}/airspyhf.h ${CMAKE_CURRENT_SOURCE_DIR}/iqbalancer.h ${CMAKE_CURRENT_SOURCE_DIR}/airspyhf_commands.h CACHE INTERNAL "List of C headers")
 
-# Dynamic library
-add_library(airspyhf SHARED ${c_sources} ${AIRSPYHF_DLL_SRCS})
-set_target_properties(airspyhf PROPERTIES VERSION ${AIRSPYHF_VER_MAJOR}.${AIRSPYHF_VER_MINOR}.${AIRSPYHF_VER_REVISION})
-set_target_properties(airspyhf PROPERTIES SOVERSION 0)
-
 # Static library
 add_library(airspyhf-static STATIC ${c_sources})
-if(MSVC)
-	set_target_properties(airspyhf-static PROPERTIES OUTPUT_NAME "airspyhf_static")
-else()
-	set_target_properties(airspyhf-static PROPERTIES OUTPUT_NAME "airspyhf")
-endif()
-
-set_target_properties(airspyhf PROPERTIES CLEAN_DIRECT_OUTPUT 1)
 set_target_properties(airspyhf-static PROPERTIES CLEAN_DIRECT_OUTPUT 1)
-
-# Dependencies
-target_link_libraries(airspyhf ${LIBUSB_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-
-# For cygwin just force UNIX OFF and WIN32 ON
-if( ${CYGWIN} )
-  SET(UNIX OFF)
-  SET(WIN32 ON)
-endif( ${CYGWIN} )
-
-if( ${UNIX} )
-   install(TARGETS airspyhf
-           LIBRARY DESTINATION lib${LIB_SUFFIX}
-           COMPONENT sharedlibs
-           )
-   install(TARGETS airspyhf-static
-           ARCHIVE DESTINATION lib${LIB_SUFFIX}
-           COMPONENT staticlibs
-           )
-   install(FILES ${c_headers}
-           DESTINATION include/${PROJECT_NAME}
-           COMPONENT headers
-           )
-endif( ${UNIX} )
-
-if( ${WIN32} )
-   install(TARGETS airspyhf
-           DESTINATION bin
-           COMPONENT sharedlibs
-           )
-   install(TARGETS airspyhf-static
-           DESTINATION bin
-           COMPONENT staticlibs
-           )
-   install(FILES ${c_headers}
-           DESTINATION include/${PROJECT_NAME}
-           COMPONENT headers
-           )
-endif( ${WIN32} )
+target_link_libraries(airspyhf-static libusb pthreads)

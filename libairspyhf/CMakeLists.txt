@@ -41,7 +41,6 @@ set(AIRSPYHF_VER_REVISION ${AIRSPYHF_VER_RE})
 set(PACKAGE libairspyhf)
 set(VERSION_STRING ${AIRSPYHF_VER_MAJOR}.${AIRSPYHF_VER_MINOR})
 set(VERSION ${VERSION_STRING})
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../cmake/modules)
 set(CMAKE_C_FLAGS_RELEASE "-O3")
 set(CMAKE_BUILD_TYPE Release)
 
@@ -74,55 +73,5 @@ else()
 		 add_definitions(-DAIRSPYHF_BIG_ENDIAN)
 	endif(${BIGENDIAN})
 endif()
-find_package(USB1 REQUIRED)
-find_package(Threads REQUIRED)
-
-include_directories(${LIBUSB_INCLUDE_DIR} ${THREADS_PTHREADS_INCLUDE_DIR})
 
 add_subdirectory(src)
-
-########################################################################
-# Create Pkg Config File
-########################################################################
-FOREACH(inc ${LIBUSB_INCLUDE_DIR})
-    LIST(APPEND AIRSPYHF_PC_CFLAGS "-I${inc}")
-ENDFOREACH(inc)
-
-# use space-separation format for the pc file
-STRING(REPLACE ";" " " AIRSPYHF_PC_CFLAGS "${AIRSPYHF_PC_CFLAGS}")
-STRING(REPLACE ";" " " AIRSPYHF_PC_LIBS "${AIRSPYHF_PC_LIBS}")
-
-# unset these vars to avoid hard-coded paths to cross environment
-IF(CMAKE_CROSSCOMPILING)
-    UNSET(AIRSPYHF_PC_CFLAGS)
-    UNSET(AIRSPYHF_PC_LIBS)
-ENDIF(CMAKE_CROSSCOMPILING)
-
-set(prefix ${CMAKE_INSTALL_PREFIX})
-set(exec_prefix \${prefix})
-set(libdir \${exec_prefix}/lib${LIB_SUFFIX})
-set(includedir \${prefix}/include)
-
-CONFIGURE_FILE(
-    ${CMAKE_CURRENT_SOURCE_DIR}/libairspyhf.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/libairspyhf.pc
-@ONLY)
-
-INSTALL(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/libairspyhf.pc
-    DESTINATION lib${LIB_SUFFIX}/pkgconfig
-)
-
-########################################################################
-# Create uninstall target
-########################################################################
-if(NOT airspyhf_all_SOURCE_DIR)
-configure_file(
-    ${PROJECT_SOURCE_DIR}/../cmake/cmake_uninstall.cmake.in
-    ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
-@ONLY)
-
-add_custom_target(uninstall
-    ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
-)
-endif()
